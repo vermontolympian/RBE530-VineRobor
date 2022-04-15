@@ -35,13 +35,15 @@ void loop() {
   key = Serial.read();
 
   if(key == 'W' || key == 'w'){
+    motorSpeed = abs(motorSpeed);
     setEffort(motorSpeed);
     Serial.println("Growing");
   }
 
-    if (key == 'S' || key == 's'){
-    setEffort(-1 * motorSpeed);
-     Serial.println("Retracting");
+  if (key == 'S' || key == 's'){
+    motorSpeed = abs(motorSpeed) * -1;
+    setEffort(motorSpeed);
+    Serial.println("Retracting");
   }
 
   if (key == 'D' || key == 'd'){
