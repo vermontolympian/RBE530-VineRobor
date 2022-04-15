@@ -8,7 +8,7 @@
 #define RETRACT           LOW
 
 /*---------------Pin Declares-------------------------------*/
-int motorPin    = 13;  // PWM output pin for rewinding motor
+int motorPin    = 11;  // PWM output pin for rewinding motor
 int motorDirPinA = 8;
 int motorDirPinB = 9;
 
@@ -19,55 +19,58 @@ int minRetractSpeed = 0; // Minimum speed required to start retraction
 
 /*---------------Control Variables--------------------------*/
 int motorSpeed   = 0;      // Controls the motor's speed from 0-255
-int speedDelta   = 5;      // Controls the change in speed
-
-bool vineState  = GROWTH; // Is the motor growing or retracting?
- 
-
-
+int speedDelta   = 10;      // Controls the change in speed
 
 unsigned char key = ' ';
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
 
   pinMode(motorPin, OUTPUT);
+  pinMode(motorDirPinA, OUTPUT);
+  pinMode(motorDirPinB, OUTPUT);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop() {  
   key = Serial.read();
 
   if(key == 'W' || key == 'w'){
-    motorSpeed = minGrowthSpeed;
     setEffort(motorSpeed);
-    vineState = GROWTH;
     Serial.println("Growing");
   }
 
-    if (key == 'S' || key == 's'){               //RETRACT, MOVE BACK  "RETREAT! WE'RE OUTNUMBERED"
-    motorSpeed = minRetractSpeed;
+    if (key == 'S' || key == 's'){
     setEffort(-1 * motorSpeed);
-    vineState = RETRACT;
      Serial.println("Retracting");
   }
 
-  if (key == 'D' || key == 'd'){               //INCREASE SPEED      "MOAH SPEEEED!"
+  if (key == 'D' || key == 'd'){
     motorSpeed += speedDelta;
+    setEffort(motorSpeed);
     Serial.println(motorSpeed);
   }
   
-  if (key == 'A' || key == 'a'){               //DECREASE SPEED      "WHOA, SLOW DOWN DUDE!"
+  if (key == 'A' || key == 'a'){
     motorSpeed -= speedDelta;
+    setEffort(motorSpeed);
     Serial.println(motorSpeed);
   }
 
-  if (key == ' '){               //STOP                "DID YOU JUST MISS THE STOP SIGN, BUDDY?"
+  if (key == '0'){
+    motorSpeed = 0;
+    setEffort(motorSpeed);
+    Serial.println("Speed = 0");
+  }
+
+  if (key == ' '){
     halt();
     Serial.println("Hit the BRAKES!!!!");
   }
 }
+
+
+
+//******FUNCTIONS******//
 
 unsigned char TestForKey(void) {
   unsigned char KeyEventOccurred;
@@ -76,22 +79,10 @@ unsigned char TestForKey(void) {
   return KeyEventOccurred;
 }
 
-// Tells the vine robot to grow at a particular motor speed
-void grow(int motorSpeed){
-    analogWrite(motorPin,motorSpeed); 
-    digitalWrite(motorDirPin, FORWARD); 
-}
-
-// Tells the vine robot to retract at a particular motor speed
-void retract(int motorSpeed){
-    analogWrite(motorPin,motorSpeed); 
-    digitalWrite(motorDirPin, REVERSE);
-}
-
 void halt(){
   digitalWrite(motorDirPinA, LOW);
   digitalWrite(motorDirPinB, LOW);
-  analogWrite(motorPin, minGrowthStop)
+  analogWrite(motorPin, minGrowthStop);
 }
 
 
@@ -104,11 +95,28 @@ void setEffort(int motorSpeed){
   else if(motorSpeed > 0){
     digitalWrite(motorDirPinA, HIGH);
     digitalWrite(motorDirPinB, LOW);
-    analogWrite(motorPin,motorSpeed)
+    analogWrite(motorPin,motorSpeed);
   }
-  else{
+  else if(motorSpeed < 0){
     digitalWrite(motorDirPinA, LOW);
     digitalWrite(motorDirPinB, HIGH);
-    analogWrite(motorPin,motorSpeed)
+    analogWrite(motorPin,abs(motorSpeed));
   }
 }
+
+
+
+
+// OLD FUNCTIONS
+
+/* // Tells the vine robot to grow at a particular motor speed
+void grow(int motorSpeed){
+    analogWrite(motorPin,motorSpeed); 
+    digitalWrite(motorDirPin, FORWARD); 
+}
+
+// Tells the vine robot to `` at a particular motor speed
+void retract(int motorSpeed){
+    analogWrite(motorPin,motorSpeed); 
+    digitalWrite(motorDirPin, REVERSE);
+} */
